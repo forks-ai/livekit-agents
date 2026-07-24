@@ -236,6 +236,7 @@ def _setup_cloud_tracer(
     *,
     room_id: str,
     job_id: str,
+    agent_name: str = "",
     observability_url: str,
     enable_traces: bool = True,
     enable_logs: bool = True,
@@ -274,6 +275,11 @@ def _setup_cloud_tracer(
     session = _AuthRefreshingSession(header_provider)
     otlp_compression = Compression.Gzip
     base_metadata: dict[str, AttributeValue] = {"room_id": room_id, "job_id": job_id}
+    if agent_name:
+        # identifies the agent for LiveKit Cloud agent insights (explicit dispatch
+        # only; the default dispatch has no agent name). Included in both the
+        # resource (traces) and the session metadata (spans + logs).
+        base_metadata[trace_types.ATTR_AGENT_NAME] = agent_name
     session_metadata = dict(base_metadata)
     if metadata:
         session_metadata.update(metadata)
